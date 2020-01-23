@@ -33,7 +33,10 @@
           :href="s.path"
           @click.prevent
         >
-          <span class="page-title">{{ s.title || s.path }}</span>
+          <span
+            class="page-title"
+            v-html="s.title || s.path"
+          ></span>
         </a>
       </li>
     </ul>
@@ -81,7 +84,12 @@ export default {
         return
       }
 
-      const result = this.index.search(query)
+      const result = this.index.search(query, 10).map(page => {
+        return {
+          ...page,
+          title: this.getQuerySnippet(page)
+        }
+      })
 
       return result
     },
@@ -149,11 +157,11 @@ export default {
         return
       }
       const path = this.suggestions[i].path
-      
+
       if (this.$route.path !== path) {
         this.$router.push(this.suggestions[i].path)
       };
-      
+
       this.query = ''
       this.focusIndex = 0
     },
@@ -168,12 +176,10 @@ export default {
 
     setupFlexSearch () {
       let defaultOptions = {
-        encode: "balance",
-        tokenize: "forward",
-        threshold: 0,
-        async: false,
-        worker: false,
-        cache: false
+        encode: "extra",
+        tokenize: "full",
+        threshold: 1,
+        resolution: 3
       }
       let options = this.$site.themeConfig.flexSearchOptions || defaultOptions
 
@@ -187,7 +193,25 @@ export default {
       this.index = new Flexsearch(options);
       const { pages } = this.$site;
       this.index.add(pages);
-    }
+    },
+
+    getQuerySnippet (page) {
+      const queryPosition = page.content.toLowerCase().indexOf(this.query)
+      const startIndex = queryPosition - 20 < 0 ? 0 : queryPosition - 20
+      const endIndex = queryPosition + 30
+      const querySnippet = page.content.slice(startIndex, endIndex)
+        .toLowerCase()
+        .replace(this.query, `<strong class="text--primary">${this.query}</strong>`)
+
+      if (querySnippet) {
+        return `<strong class="text--primary">${page.title}</strong> > .. ${querySnippet} ..`
+          .replace(/\|/g, ' ')
+          .replace(/:::/g, ' ')
+      } else {
+        return page.title
+      }
+    },
+
   }
 }
 </script>
@@ -321,5 +345,9 @@ export default {
       width: 8rem;
     }
   }
+}
+
+.text--primary {
+  color: $accentColor;
 }
 </style>
