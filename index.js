@@ -1,4 +1,3 @@
-const removeMarkdown = require('remove-markdown')
 const { path } = require('@vuepress/shared-utils')
 
 module.exports = (options) => ({
@@ -6,7 +5,7 @@ module.exports = (options) => ({
         const {
             _content
         } = $page
-        $page.content = removeMarkdown(_content)
+        $page.content = _content
     },
     alias: {
         '@SearchBox':

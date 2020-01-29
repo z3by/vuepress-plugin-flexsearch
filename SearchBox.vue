@@ -199,14 +199,17 @@ export default {
       const queryPosition = page.content.toLowerCase().indexOf(this.query)
       const startIndex = queryPosition - 20 < 0 ? 0 : queryPosition - 20
       const endIndex = queryPosition + 30
-      const querySnippet = page.content.slice(startIndex, endIndex)
+      let querySnippet = page.content.slice(startIndex, endIndex)
         .toLowerCase()
-        .replace(this.query, `<strong class="text--primary">${this.query}</strong>`)
+        .replace(/[\W_]+/g, " ")
+
+      const queryWords = this.query.split(' ').filter((v, i, a) => !!v && a.indexOf(v) === i); 
+      for (const word of queryWords) {
+        querySnippet = querySnippet.replace(new RegExp(word, 'gi'), `<strong class="text--primary">${word}</strong>`)
+      }
 
       if (querySnippet) {
         return `<strong class="text--primary">${page.title}</strong> > .. ${querySnippet} ..`
-          .replace(/\|/g, ' ')
-          .replace(/:::/g, ' ')
       } else {
         return page.title
       }

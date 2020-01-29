@@ -27,7 +27,6 @@
   "homepage": "https://github.com/z3by/vuepress-plugin-flexsearch#readme",
   "dependencies": {
     "flexsearch": "nextapps-de/flexsearch",
-    "remove-markdown": "^0.3.0",
     "vuepress": "^1.2.0"
   }
 }
