@@ -204,12 +204,22 @@ export default {
         .replace(/[\W_]+/g, " ")
 
       const queryWords = this.query.split(' ').filter((v, i, a) => !!v && a.indexOf(v) === i); 
-      for (const word of queryWords) {
-        querySnippet = querySnippet.replace(new RegExp(word, 'gi'), `<strong class="text--primary">${word}</strong>`)
+
+      let highlightedSnippet = ""
+      for (let i = 0; i < querySnippet.length;) {
+        const remainingSnippet = querySnippet.slice(i)
+        const matchingWord = queryWords.find(word => querySnippet.slice(i).startsWith(word))
+        if (matchingWord === undefined) {
+          highlightedSnippet += querySnippet[i]
+          i += 1
+        } else {
+          highlightedSnippet += `<strong class="text--primary">${matchingWord}</strong>`
+          i += matchingWord.length
+        }
       }
 
-      if (querySnippet) {
-        return `<strong class="text--primary">${page.title}</strong> > .. ${querySnippet} ..`
+      if (highlightedSnippet) {
+        return `<strong class="text--primary">${page.title}</strong> > .. ${highlightedSnippet} ..`
       } else {
         return page.title
       }
