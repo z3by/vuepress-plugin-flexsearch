@@ -29,6 +29,6 @@
     "vuepress": "^1.4.0"
   },
   "dependencies": {
-    "flexsearch": "nextapps-de/flexsearch",
+    "flexsearch": "nextapps-de/flexsearch"
   }
 }
