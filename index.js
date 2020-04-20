@@ -2,6 +2,9 @@ const { path } = require('@vuepress/shared-utils')
 
 module.exports = (options) => ({
     extendPageData ($page) {
+        if (!$page._strippedContent) {
+            return
+        }
         // _strippedContent does not contain the YAML frontmatter
         const { html } = $page._context.markdown.render($page._strippedContent)
         const text = html
