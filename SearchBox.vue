@@ -199,21 +199,19 @@ export default {
       const queryPosition = page.content.toLowerCase().indexOf(this.query)
       const startIndex = queryPosition - 20 < 0 ? 0 : queryPosition - 20
       const endIndex = queryPosition + 30
-      let querySnippet = page.content.slice(startIndex, endIndex)
-        .toLowerCase()
-        .replace(/[\W_]+/g, " ")
+      const querySnippet = page.content.slice(startIndex, endIndex)
 
-      const queryWords = this.query.split(' ').filter((v, i, a) => !!v && a.indexOf(v) === i); 
+      const queryWords = this.query.toLowerCase().split(' ').filter((v, i, a) => !!v && a.indexOf(v) === i); 
 
       let highlightedSnippet = ""
       for (let i = 0; i < querySnippet.length;) {
-        const remainingSnippet = querySnippet.slice(i)
-        const matchingWord = queryWords.find(word => querySnippet.slice(i).startsWith(word))
+        const matchingWord = queryWords.find(word => querySnippet.toLowerCase().startsWith(word, i))
         if (matchingWord === undefined) {
           highlightedSnippet += querySnippet[i]
           i += 1
         } else {
-          highlightedSnippet += `<strong class="text--primary">${matchingWord}</strong>`
+          const highlightedWord = querySnippet.slice(i, i + matchingWord.length)
+          highlightedSnippet += `<strong class="text--primary">${highlightedWord}</strong>`
           i += matchingWord.length
         }
       }
