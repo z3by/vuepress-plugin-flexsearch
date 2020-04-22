@@ -1,6 +1,6 @@
 {
   "name": "vuepress-plugin-flexsearch",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Next-Generation full text search library for Vuepress",
   "main": "index.js",
   "publishConfig": {
@@ -15,18 +15,23 @@
     "url": "https://github.com/z3by/vuepress-plugin-flexsearch"
   },
   "keywords": [
-    "documentation",
-    "vue",
-    "vuepress",
-    "generator",
+    "vuepress-plugin-flexsearch",
+    "vuepress-search",
     "search",
-    "vuepress-plugin"
+    "vuepress-plugin",
+    "vuepress"
   ],
-  "author": "z3by <zoaby.am@gmail.com>",
+  "author": {
+    "name": "Ahmad Mostafa",
+    "email": "zoaby.am@gmail.com",
+    "url": "https://github.com/z3by"
+  },
   "license": "MIT",
   "homepage": "https://github.com/z3by/vuepress-plugin-flexsearch#readme",
+  "devDependencies": {
+    "vuepress": "^1.4.1"
+  },
   "dependencies": {
-    "flexsearch": "nextapps-de/flexsearch",
-    "vuepress": "^1.2.0"
+    "flexsearch": "nextapps-de/flexsearch"
   }
 }
