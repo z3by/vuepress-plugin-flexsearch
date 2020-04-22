@@ -1,6 +1,6 @@
 {
   "name": "vuepress-plugin-flexsearch",
-  "version": "0.0.2",
+  "version": "0.0.5",
   "description": "Next-Generation full text search library for Vuepress",
   "main": "index.js",
   "publishConfig": {
