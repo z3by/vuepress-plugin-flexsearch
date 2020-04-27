@@ -43,3 +43,7 @@ Thanks to [nextapps-de/flexsearch](https://github.com/nextapps-de/flexsearch)
 ## Contributions
 
 PRs are welcome :heart:
+
+## Changelog
+
+Go to [Changelog](./CHANGELOG.md)
