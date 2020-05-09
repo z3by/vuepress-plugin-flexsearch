@@ -2,8 +2,6 @@
 sidebar: auto
 ---
 
-# Config
-
 ## foo
 
 - Type: `string`
