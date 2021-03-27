@@ -1,7 +1,7 @@
 <template>
   <div class="search-box">
     <input
-      @input="query = $event.target.value"
+      @input="onInput"
       aria-label="Search"
       :value="query"
       :class="{ focused: focused }"
@@ -44,6 +44,7 @@
 <script>
 import Flexsearch from "flexsearch";
 import { highlightText } from "./utils";
+import hooks from '@dynamic/search-hooks'
 
 /* global 
 SEARCH_MAX_SUGGESTIONS
@@ -133,6 +134,11 @@ export default {
           return page.path.match(path);
         }).length > 0
       );
+    },
+
+    onInput(event) {
+      this.query = event.target.value;
+      hooks.onSearch(this.query);
     },
 
     onHotkey(event) {
