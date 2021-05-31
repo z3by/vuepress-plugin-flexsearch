@@ -20,6 +20,10 @@ module.exports.getPageText = (page) => {
   return text;
 };
 
+function escapeRegExp(string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 /**
  * @param  {string} fullText
  * @param  {string} highlightTarget
@@ -30,11 +34,12 @@ module.exports.highlightText = (fullText, highlightTarget) => {
   highlightWords = highlightTarget.split(" ").filter((word) => word.length > 0);
   if (highlightWords.length > 0) {
     for (const word of highlightWords) {
-      result = result.replace(new RegExp(word, "ig"), "<em>$&</em>");
+      result = result.replace(new RegExp(escapeRegExp(word), "ig"), "<em>$&</em>");
     }
   } else {
-    result = fullText.replace(new RegExp(highlightTarget, "ig"), "<em>$&</em>");
+    result = fullText.replace(new RegExp(escapeRegExp(highlightTarget), "ig"), "<em>$&</em>");
   }
 
   return result;
 };
+
