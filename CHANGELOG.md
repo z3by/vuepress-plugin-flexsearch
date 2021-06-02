@@ -1,3 +1,8 @@
+# 0.2.0 (2021-06-02)
+
+- Dependency upgrades
+- Fix Searching for words with RegExp special characters in them fails with errors
+
 # [0.1.0](https://github.com/z3by/vuepress-plugin-flexsearch/compare/v0.0.5...v0.1.0) (2020-05-09)
 
 
