@@ -59,7 +59,8 @@ export default {
       focused: false,
       focusIndex: 0,
       placeholder: undefined,
-      index: null,
+      indexCN: null,
+      indexEN: null,
     };
   },
 
@@ -84,16 +85,29 @@ export default {
       if (!query) {
         return;
       }
-
-      const result = this.index
-        .search(query, SEARCH_MAX_SUGGESTIONS)
-        .map((page) => {
-          return {
-            ...page,
-            title: this.getSuggestionTitle(page),
-            text: this.getSuggestionText(page),
-          };
-        });
+      const regex = /[\x00-\x7F]/g;
+      let result;
+      if (regex.test(query)) {
+        result = this.indexEN
+          .search(query, SEARCH_MAX_SUGGESTIONS)
+          .map((page) => {
+            return {
+              ...page,
+              title: this.getSuggestionTitle(page),
+              text: this.getSuggestionText(page),
+            };
+          });
+      } else {
+        result = this.indexCN
+          .search(query, SEARCH_MAX_SUGGESTIONS)
+          .map((page) => {
+            return {
+              ...page,
+              title: this.getSuggestionTitle(page),
+              text: this.getSuggestionText(page),
+            };
+          });
+      }
 
       return result;
     },
@@ -188,9 +202,35 @@ export default {
     },
 
     setupFlexSearch() {
-      this.index = new Flexsearch(SEARCH_OPTIONS);
+      // Chinese search
+      const searchCNOptions = {
+        encode: "icase",
+        tokenize: function (str) {
+          return str.replace(/[\x00-\x7F]/g, "").split("");
+        },
+        resolution: 9,
+        doc: {
+          id: "key",
+          field: ["title", "content", "headers"],
+        },
+      };
+
+      // English search
+      const searchENOptions = {
+        encode: "icase",
+        tokenize: "forward",
+        resolution: 9,
+        doc: {
+          id: "key",
+          field: ["title", "content", "headers"],
+        },
+      };
+
+      this.indexCN = new Flexsearch(searchCNOptions);
+      this.indexEN = new Flexsearch(searchENOptions);
       const { pages } = this.$site;
-      this.index.add(pages);
+      this.indexCN.add(pages);
+      this.indexEN.add(pages);
     },
 
     getSuggestionTitle(page) {
@@ -233,7 +273,7 @@ export default {
     color: lighten($textColor, 25%);
     display: inline-block;
     border: 1px solid darken($borderColor, 10%);
-    border-radius: .4rem;
+    border-radius: 0.4rem;
     font-size: 0.9rem;
     line-height: 2rem;
     padding: 0 0.5rem 0 2rem;
@@ -250,14 +290,18 @@ export default {
   }
 
   .suggestions {
+    list-style-type: none;
+    display: block;
+    overflow: auto;
     background: white;
     width: 20rem;
+    max-height: 35rem;
     position: absolute;
     top: 1.5rem;
     border: 1px solid darken($borderColor, 10%);
-    padding: .4rem;
-    border-radius: .6rem;
-    list-style-type: none;
+    padding: 0.4rem;
+    border-radius: 0.6rem;
+    // list-style-type: none;
 
     &.align-right {
       right: 0;
@@ -275,14 +319,15 @@ export default {
 
       em {
         color: $accentColor;
-        font-weight bold;
-        font-style normal
+        font-weight: bold;
+        font-style: normal;
       }
+
       .suggestion__title {
         font-weight: 600;
         color: $textColor;
-        display block;
-        padding-bottom .4rem;
+        display: block;
+        padding-bottom: 0.4rem;
       }
 
       .suggestion__text {
