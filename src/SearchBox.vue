@@ -44,7 +44,6 @@
 <script>
 import Flexsearch from "flexsearch";
 import { highlightText } from "./utils";
-
 /* global 
 SEARCH_MAX_SUGGESTIONS
 SEARCH_PATHS
@@ -59,45 +58,52 @@ export default {
       focused: false,
       focusIndex: 0,
       placeholder: undefined,
-      index: null,
+      indexCN: null,
+      indexEN: null,
     };
   },
-
   mounted() {
     this.placeholder = this.$site.themeConfig.searchPlaceholder || "";
     document.addEventListener("keydown", this.onHotkey);
-
     this.setupFlexSearch();
   },
-
   beforeDestroy() {
     document.removeEventListener("keydown", this.onHotkey);
   },
-
   computed: {
     showSuggestions() {
       return this.focused && this.suggestions && this.suggestions.length;
     },
-
     suggestions() {
       const query = this.query.trim().toLowerCase();
       if (!query) {
         return;
       }
-
-      const result = this.index
-        .search(query, SEARCH_MAX_SUGGESTIONS)
-        .map((page) => {
-          return {
-            ...page,
-            title: this.getSuggestionTitle(page),
-            text: this.getSuggestionText(page),
-          };
-        });
-
+      const regex = /[\x00-\x7F]/g;
+      let result;
+      if (regex.test(query)) {
+        result = this.indexEN
+          .search(query, SEARCH_MAX_SUGGESTIONS)
+          .map((page) => {
+            return {
+              ...page,
+              title: this.getSuggestionTitle(page),
+              text: this.getSuggestionText(page),
+            };
+          });
+      } else {
+        result = this.indexCN
+          .search(query, SEARCH_MAX_SUGGESTIONS)
+          .map((page) => {
+            return {
+              ...page,
+              title: this.getSuggestionTitle(page),
+              text: this.getSuggestionText(page),
+            };
+          });
+      }
       return result;
     },
-
     // make suggestions align right when there are not enough items
     alignRight() {
       const navCount = (this.$site.themeConfig.nav || []).length;
@@ -105,7 +111,6 @@ export default {
       return navCount + repo <= 2;
     },
   },
-
   methods: {
     getPageLocalePath(page) {
       for (const localePath in this.$site.locales || {}) {
@@ -115,26 +120,21 @@ export default {
       }
       return "/";
     },
-
     isSearchable(page) {
       let searchPaths = SEARCH_PATHS;
-
       // all paths searchables
       if (searchPaths === null) {
         return true;
       }
-
       searchPaths = Array.isArray(searchPaths)
         ? searchPaths
         : new Array(searchPaths);
-
       return (
         searchPaths.filter((path) => {
           return page.path.match(path);
         }).length > 0
       );
     },
-
     onHotkey(event) {
       if (
         event.srcElement === document.body &&
@@ -144,7 +144,6 @@ export default {
         event.preventDefault();
       }
     },
-
     onUp() {
       if (this.showSuggestions) {
         if (this.focusIndex > 0) {
@@ -154,7 +153,6 @@ export default {
         }
       }
     },
-
     onDown() {
       if (this.showSuggestions) {
         if (this.focusIndex < this.suggestions.length - 1) {
@@ -164,40 +162,56 @@ export default {
         }
       }
     },
-
     go(i) {
       if (!this.showSuggestions) {
         return;
       }
       const path = this.suggestions[i].path;
-
       if (this.$route.path !== path) {
         this.$router.push(this.suggestions[i].path);
       }
-
       this.query = "";
       this.focusIndex = 0;
     },
-
     focus(i) {
       this.focusIndex = i;
     },
-
     unfocus() {
       this.focusIndex = -1;
     },
-
     setupFlexSearch() {
-      this.index = new Flexsearch(SEARCH_OPTIONS);
+      // Chinese search
+      const searchCNOptions = {
+        encode: "icase",
+        tokenize: function (str) {
+          return str.replace(/[\x00-\x7F]/g, "").split("");
+        },
+        resolution: 9,
+        doc: {
+          id: "key",
+          field: ["title", "content", "headers"],
+        },
+      };
+      // English search
+      const searchENOptions = {
+        encode: "icase",
+        tokenize: "forward",
+        resolution: 9,
+        doc: {
+          id: "key",
+          field: ["title", "content", "headers"],
+        },
+      };
+      this.indexCN = new Flexsearch(searchCNOptions);
+      this.indexEN = new Flexsearch(searchENOptions);
       const { pages } = this.$site;
-      this.index.add(pages);
+      this.indexCN.add(pages);
+      this.indexEN.add(pages);
     },
-
     getSuggestionTitle(page) {
       const title = page.title ? page.title : page.regularPath;
       return highlightText(title, this.query);
     },
-
     getSuggestionText(page) {
       const content = page.content;
       const queryIndex = content
@@ -225,7 +239,6 @@ export default {
   display: inline-block;
   position: relative;
   margin-right: 1rem;
-
   input {
     cursor: text;
     width: 10rem;
@@ -233,7 +246,7 @@ export default {
     color: lighten($textColor, 25%);
     display: inline-block;
     border: 1px solid darken($borderColor, 10%);
-    border-radius: .4rem;
+    border-radius: 0.4rem;
     font-size: 0.9rem;
     line-height: 2rem;
     padding: 0 0.5rem 0 2rem;
@@ -241,61 +254,56 @@ export default {
     transition: all 0.2s ease;
     background: #fff url('./assets/search.svg') 0.6rem 0.5rem no-repeat;
     background-size: 1rem;
-
     &:focus {
       cursor: auto;
       border-color: $accentColor;
       width: 15rem;
     }
   }
-
   .suggestions {
+    list-style-type: none;
+    display: block;
+    overflow: auto;
     background: white;
     width: 20rem;
+    max-height: 35rem;
     position: absolute;
     top: 1.5rem;
     border: 1px solid darken($borderColor, 10%);
-    padding: .4rem;
-    border-radius: .6rem;
-    list-style-type: none;
-
+    padding: 0.4rem;
+    border-radius: 0.6rem;
+    // list-style-type: none;
     &.align-right {
       right: 0;
     }
   }
-
   .suggestion {
     line-height: 1.4;
     padding: 0.6rem 1rem;
     cursor: pointer;
-
     a {
       white-space: normal;
       color: lighten($textColor, 35%);
-
       em {
         color: $accentColor;
-        font-weight bold;
-        font-style normal
+        font-weight: bold;
+        font-style: normal;
       }
       .suggestion__title {
         font-weight: 600;
         color: $textColor;
-        display block;
-        padding-bottom .4rem;
+        display: block;
+        padding-bottom: 0.4rem;
       }
-
       .suggestion__text {
         font-size: 0.9em;
       }
     }
-
     &.focused {
       background-color: lighten($accentColor, 93%);
     }
   }
 }
-
 @media (max-width: $MQNarrow) {
   .search-box {
     input {
@@ -303,7 +311,6 @@ export default {
       width: 0;
       border-color: transparent;
       position: relative;
-
       &:focus {
         cursor: text;
         left: 0;
@@ -312,14 +319,12 @@ export default {
     }
   }
 }
-
 // Match IE11
 @media all and (-ms-high-contrast: none) {
   .search-box input {
     height: 2rem;
   }
 }
-
 @media (max-width: $MQNarrow) and (min-width: $MQMobile) {
   .search-box {
     .suggestions {
@@ -327,33 +332,27 @@ export default {
     }
   }
 }
-
 @media (max-width: $MQMobile) {
   .search-box {
     margin-right: 0;
-
     input {
       left: 1rem;
     }
-
     .suggestions {
       right: 0;
     }
   }
 }
-
 @media (max-width: $MQMobileNarrow) {
   .search-box {
     .suggestions {
       width: calc(100vw - 4rem);
     }
-
     input:focus {
       width: 8rem;
     }
   }
 }
-
 .highlighted {
   color: $accentColor;
 }
