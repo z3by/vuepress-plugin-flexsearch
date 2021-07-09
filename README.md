@@ -12,8 +12,8 @@ Next-Generation full text search library for Vuepress
 ## Installation
 
 ```bash
-yarn add -D vuepress-plugin-flexsearch
-// or npm install vuepress-plugin-flexsearch -D
+yarn add -D vuepress-plugin-flexsearch-plus
+// or npm install vuepress-plugin-flexsearch-plus -D
 
 ```
 
