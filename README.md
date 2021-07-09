@@ -9,7 +9,7 @@ Next-Generation full text search library for Vuepress
 
 > A great replacement of the default Vuepress search plugin.
 
-* [![](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#github.com/bajins/vuepress-plugin-flexsearch-plus)
+[![](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#github.com/bajins/vuepress-plugin-flexsearch-plus)
 
 ## Installation
 
