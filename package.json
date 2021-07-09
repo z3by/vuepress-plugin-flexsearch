@@ -2,6 +2,7 @@
   "name": "vuepress-plugin-flexsearch-plus",
   "version": "0.2.0",
   "description": "Next-Generation full text search library for Vuepress",
+  "displayName": "flexsearch-plus",
   "main": "index.js",
   "publishConfig": {
     "access": "public"
