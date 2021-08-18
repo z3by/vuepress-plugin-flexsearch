@@ -4,7 +4,7 @@ const he = require("he");
  * @param  page
  * @returns {string}
  */
-module.exports.getPageText = (page) => {
+module.exports.getPageText = (page, noExtraSpaceAfterHtmlTag) => {
   if (!page._strippedContent) {
     return "";
   }
@@ -14,7 +14,7 @@ module.exports.getPageText = (page) => {
   const text = he.decode(
     // decode HTML entities like &quot;
     html
-      .replace(/(<[^>]+>)+/g, " ") // remove HTML tags
+      .replace(/(<[^>]+>)+/g, noExtraSpaceAfterHtmlTag ? "" : " ") // remove HTML tags
       .replace(/^\s*#\s/gm, "") // remove header anchors inserted by vuepress
   );
   return text;

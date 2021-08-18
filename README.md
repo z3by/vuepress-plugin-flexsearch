@@ -48,6 +48,7 @@ module.exports = {
         searchHotkeys: ['s'],    // Hot keys to activate the search input, the default is "s" but you can add more.
         searchResultLength: 60,    // the length of the suggestion result text by characters, the default is 60 characters.
         splitHighlightedWords: ' ',  // regex or string to split highlighted words by, keep it null to use flexsearch.split
+        noExtraSpaceAfterHtmlTag: false,   // don't add extra spaces in highlighted results
         /*
           Default FlexSearch options
           To override the default options you can see available options at https://github.com/nextapps-de/flexsearch

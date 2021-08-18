@@ -15,7 +15,7 @@ const DEFAULT_SEARCH_RESULT_LENGTH = 60;
 
 module.exports = (options) => ({
   extendPageData($page) {
-    $page.content = getPageText($page);
+    $page.content = getPageText($page, options.noExtraSpaceAfterHtmlTag);
   },
   alias: {
     "@SearchBox": path.resolve(__dirname, "src", "SearchBox.vue"),
