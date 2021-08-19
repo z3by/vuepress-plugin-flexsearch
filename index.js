@@ -27,5 +27,6 @@ module.exports = (options) => ({
     SEARCH_HOTKEYS: options.searchHotkeys || "s",
     SEARCH_RESULT_LENGTH:
       Number(options.searchResultLength) || DEFAULT_SEARCH_RESULT_LENGTH,
+    SEARCH_SPLIT_HIGHLIGHTED_WORDS: options.splitHighlightedWords || null,
   },
 });
