@@ -64,6 +64,12 @@ module.exports = {
    * Apply plugins，ref：https://v1.vuepress.vuejs.org/zh/plugin/
    */
   plugins: [
-    [require.resolve("../../../"), {}],
+    [require.resolve("../../../"), {
+      hooks: {
+        onSearch: (query) => {
+          console.info(`Search initiated! Query = ${query}`);
+        }
+      }
+    }],
   ],
 };
