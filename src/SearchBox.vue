@@ -14,7 +14,7 @@
       @keyup.enter="go(focusIndex)"
       @keyup.up="onUp"
       @keyup.down="onDown"
-    />
+    >
     <ul
       v-if="showSuggestions"
       class="suggestions"
@@ -29,6 +29,7 @@
         @mousedown="go(i)"
         @mouseenter="focus(i)"
       >
+        <!-- Override @vuepress/plugin-search/SearchBox.vue -->
         <a
           :href="s.regularPath"
           @click.prevent
@@ -45,6 +46,7 @@
 </template>
 
 <script>
+import VuepressSearchBox from "@vuepress/plugin-search/SearchBox.vue";
 import Flexsearch from "flexsearch";
 import { highlightText } from "./utils";
 
@@ -56,25 +58,15 @@ SEARCH_OPTIONS
 SEARCH_RESULT_LENGTH
 */
 export default {
+  extends: VuepressSearchBox,
   data () {
     return {
-      query: '',
-      focused: false,
-      focusIndex: 0,
-      placeholder: undefined,
       index: null,
     }
   },
 
   computed: {
-    showSuggestions () {
-      return (
-        this.focused
-        && this.suggestions
-        && this.suggestions.length
-      )
-    },
-
+    // Override @vuepress/plugin-search/SearchBox.vue
     suggestions () {
       const query = this.query.trim().toLowerCase()
       if (!query) {
@@ -93,77 +85,15 @@ export default {
 
       return result;
     },
-
-    // make suggestions align right when there are not enough items
-    alignRight () {
-      const navCount = (this.$site.themeConfig.nav || []).length
-      const repo = this.$site.repo ? 1 : 0
-      return navCount + repo <= 2
-    }
   },
 
   mounted () {
-    this.placeholder = this.$site.themeConfig.searchPlaceholder || ''
-    document.addEventListener('keydown', this.onHotkey)
-
     this.setupFlexSearch();
   },
 
-  beforeDestroy () {
-    document.removeEventListener('keydown', this.onHotkey)
-  },
-
   methods: {
-    getPageLocalePath (page) {
-      for (const localePath in this.$site.locales || {}) {
-        if (localePath !== '/' && page.path.indexOf(localePath) === 0) {
-          return localePath
-        }
-      }
-      return '/'
-    },
-
-    isSearchable (page) {
-      let searchPaths = SEARCH_PATHS
-
-      // all paths searchables
-      if (searchPaths === null) { return true }
-
-      searchPaths = Array.isArray(searchPaths) ? searchPaths : new Array(searchPaths)
-
-      return searchPaths.filter(path => {
-          return page.path.match(path)
-        }).length > 0
-    },
-
-    onHotkey (event) {
-      if (event.srcElement === document.body && SEARCH_HOTKEYS.includes(event.key)) {
-        this.$refs.input.focus()
-        event.preventDefault()
-      }
-    },
-
-    onUp () {
-      if (this.showSuggestions) {
-        if (this.focusIndex > 0) {
-          this.focusIndex--
-        } else {
-          this.focusIndex = this.suggestions.length - 1
-        }
-      }
-    },
-
-    onDown () {
-      if (this.showSuggestions) {
-        if (this.focusIndex < this.suggestions.length - 1) {
-          this.focusIndex++
-        } else {
-          this.focusIndex = 0
-        }
-      }
-    },
-
-    go (i) {
+    // Override @vuepress/plugin-search/SearchBox.vue
+    go(i) {
       if (!this.showSuggestions) {
         return
       }
@@ -175,14 +105,6 @@ export default {
 
       this.query = ''
       this.focusIndex = 0
-    },
-
-    focus (i) {
-      this.focusIndex = i
-    },
-
-    unfocus () {
-      this.focusIndex = -1
     },
 
     setupFlexSearch() {
@@ -219,50 +141,18 @@ export default {
 </script>
 
 <style lang="stylus">
+// Override @vuepress/plugin-search/SearchBox.vue
 .search-box
-  display inline-block
-  position relative
-  margin-right 1rem
   input
-    cursor text
-    width 10rem
-    height: 2rem
-    color lighten($textColor, 25%)
-    display inline-block
-    border 1px solid darken($borderColor, 10%)
     border-radius .4rem
-    font-size 0.9rem
-    line-height 2rem
-    padding 0 0.5rem 0 2rem
-    outline none
-    transition all .2s ease
-    background #fff url('./assets/search.svg') 0.6rem 0.5rem no-repeat
-    background-size 1rem
-
     &:focus
-      cursor auto
-      border-color $accentColor
       width: 15rem;
   .suggestions
-    background #fff
-    width 20rem
-    position absolute
     top 1.5rem
-    border 1px solid darken($borderColor, 10%)
     border-radius .6rem
-    padding 0.4rem
-    list-style-type none
-    &.align-right
-      right 0
   .suggestion
-    line-height 1.4
     padding 0.6rem 1rem
-    cursor pointer
-
     a
-      white-space: normal;
-      color: lighten($textColor, 35%);
-
       em
         color $accentColor
         font-weight bold
@@ -272,48 +162,8 @@ export default {
         color $textColor
         display block
         padding-bottom .4rem
-
       .suggestion__text
         font-size 0.9em
     &.focused
       background-color lighten($accentColor, 93%)
-@media (max-width: $MQNarrow)
-  .search-box
-    input
-      cursor pointer
-      width 0
-      border-color transparent
-      position relative
-      &:focus
-        cursor text
-        left 0
-        width 10rem
-
-// Match IE11
-@media all and (-ms-high-contrast: none)
-  .search-box input
-    height 2rem
-
-@media (max-width: $MQNarrow) and (min-width: $MQMobile)
-  .search-box
-    .suggestions
-      left 0
-
-@media (max-width: $MQMobile)
-  .search-box
-    margin-right 0
-    input
-      left 1rem
-    .suggestions
-      right 0
-
-@media (max-width: $MQMobileNarrow)
-  .search-box
-    .suggestions
-      width calc(100vw - 4rem)
-    input:focus
-      width 8rem
-
-.highlighted
-  color $accentColor
 </style>

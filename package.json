@@ -35,6 +35,7 @@
     "vuepress": "^1.4.1"
   },
   "dependencies": {
+    "@vuepress/plugin-search": "^1.8.2",
     "flexsearch": "^0.6.32"
   }
 }
