@@ -1,35 +1,38 @@
 <template>
   <div class="search-box">
     <input
-      @input="query = $event.target.value"
+      ref="input"
       aria-label="Search"
       :value="query"
-      :class="{ focused: focused }"
+      :class="{ 'focused': focused }"
       :placeholder="placeholder"
       autocomplete="off"
       spellcheck="false"
+      @input="query = $event.target.value"
       @focus="focused = true"
       @blur="focused = false"
       @keyup.enter="go(focusIndex)"
       @keyup.up="onUp"
       @keyup.down="onDown"
-      ref="input"
     />
     <ul
-      class="suggestions"
       v-if="showSuggestions"
+      class="suggestions"
       :class="{ 'align-right': alignRight }"
       @mouseleave="unfocus"
     >
       <li
-        class="suggestion"
         v-for="(s, i) in suggestions"
         :key="i"
+        class="suggestion"
         :class="{ focused: i === focusIndex }"
         @mousedown="go(i)"
         @mouseenter="focus(i)"
       >
-        <a :href="s.regularPath" @click.prevent>
+        <a
+          :href="s.regularPath"
+          @click.prevent
+        >
           <span
             v-html="s.title || s.regularPath"
             class="suggestion__title"
@@ -45,7 +48,7 @@
 import Flexsearch from "flexsearch";
 import { highlightText } from "./utils";
 
-/* global 
+/* global
 SEARCH_MAX_SUGGESTIONS
 SEARCH_PATHS
 SEARCH_HOTKEYS
@@ -53,36 +56,29 @@ SEARCH_OPTIONS
 SEARCH_RESULT_LENGTH
 */
 export default {
-  data() {
+  data () {
     return {
-      query: "",
+      query: '',
       focused: false,
       focusIndex: 0,
       placeholder: undefined,
       index: null,
-    };
-  },
-
-  mounted() {
-    this.placeholder = this.$site.themeConfig.searchPlaceholder || "";
-    document.addEventListener("keydown", this.onHotkey);
-
-    this.setupFlexSearch();
-  },
-
-  beforeDestroy() {
-    document.removeEventListener("keydown", this.onHotkey);
+    }
   },
 
   computed: {
-    showSuggestions() {
-      return this.focused && this.suggestions && this.suggestions.length;
+    showSuggestions () {
+      return (
+        this.focused
+        && this.suggestions
+        && this.suggestions.length
+      )
     },
 
-    suggestions() {
-      const query = this.query.trim().toLowerCase();
+    suggestions () {
+      const query = this.query.trim().toLowerCase()
       if (!query) {
-        return;
+        return
       }
 
       const result = this.index
@@ -99,92 +95,94 @@ export default {
     },
 
     // make suggestions align right when there are not enough items
-    alignRight() {
-      const navCount = (this.$site.themeConfig.nav || []).length;
-      const repo = this.$site.repo ? 1 : 0;
-      return navCount + repo <= 2;
-    },
+    alignRight () {
+      const navCount = (this.$site.themeConfig.nav || []).length
+      const repo = this.$site.repo ? 1 : 0
+      return navCount + repo <= 2
+    }
+  },
+
+  mounted () {
+    this.placeholder = this.$site.themeConfig.searchPlaceholder || ''
+    document.addEventListener('keydown', this.onHotkey)
+
+    this.setupFlexSearch();
+  },
+
+  beforeDestroy () {
+    document.removeEventListener('keydown', this.onHotkey)
   },
 
   methods: {
-    getPageLocalePath(page) {
+    getPageLocalePath (page) {
       for (const localePath in this.$site.locales || {}) {
-        if (localePath !== "/" && page.path.indexOf(localePath) === 0) {
-          return localePath;
+        if (localePath !== '/' && page.path.indexOf(localePath) === 0) {
+          return localePath
         }
       }
-      return "/";
+      return '/'
     },
 
-    isSearchable(page) {
-      let searchPaths = SEARCH_PATHS;
+    isSearchable (page) {
+      let searchPaths = SEARCH_PATHS
 
       // all paths searchables
-      if (searchPaths === null) {
-        return true;
-      }
+      if (searchPaths === null) { return true }
 
-      searchPaths = Array.isArray(searchPaths)
-        ? searchPaths
-        : new Array(searchPaths);
+      searchPaths = Array.isArray(searchPaths) ? searchPaths : new Array(searchPaths)
 
-      return (
-        searchPaths.filter((path) => {
-          return page.path.match(path);
+      return searchPaths.filter(path => {
+          return page.path.match(path)
         }).length > 0
-      );
     },
 
-    onHotkey(event) {
-      if (
-        event.srcElement === document.body &&
-        SEARCH_HOTKEYS.includes(event.key)
-      ) {
-        this.$refs.input.focus();
-        event.preventDefault();
+    onHotkey (event) {
+      if (event.srcElement === document.body && SEARCH_HOTKEYS.includes(event.key)) {
+        this.$refs.input.focus()
+        event.preventDefault()
       }
     },
 
-    onUp() {
+    onUp () {
       if (this.showSuggestions) {
         if (this.focusIndex > 0) {
-          this.focusIndex--;
+          this.focusIndex--
         } else {
-          this.focusIndex = this.suggestions.length - 1;
+          this.focusIndex = this.suggestions.length - 1
         }
       }
     },
 
-    onDown() {
+    onDown () {
       if (this.showSuggestions) {
         if (this.focusIndex < this.suggestions.length - 1) {
-          this.focusIndex++;
+          this.focusIndex++
         } else {
-          this.focusIndex = 0;
+          this.focusIndex = 0
         }
       }
     },
 
-    go(i) {
+    go (i) {
       if (!this.showSuggestions) {
-        return;
+        return
       }
-      const path = this.suggestions[i].path;
+      const path = this.suggestions[i].path
 
       if (this.$route.path !== path) {
-        this.$router.push(this.suggestions[i].path);
+        this.$router.push(this.suggestions[i].path)
       }
 
-      this.query = "";
-      this.focusIndex = 0;
+      this.query = ''
+      this.focusIndex = 0
     },
 
-    focus(i) {
-      this.focusIndex = i;
+    focus (i) {
+      this.focusIndex = i
     },
 
-    unfocus() {
-      this.focusIndex = -1;
+    unfocus () {
+      this.focusIndex = -1
     },
 
     setupFlexSearch() {
@@ -221,140 +219,101 @@ export default {
 </script>
 
 <style lang="stylus">
-.search-box {
-  display: inline-block;
-  position: relative;
-  margin-right: 1rem;
+.search-box
+  display inline-block
+  position relative
+  margin-right 1rem
+  input
+    cursor text
+    width 10rem
+    height: 2rem
+    color lighten($textColor, 25%)
+    display inline-block
+    border 1px solid darken($borderColor, 10%)
+    border-radius .4rem
+    font-size 0.9rem
+    line-height 2rem
+    padding 0 0.5rem 0 2rem
+    outline none
+    transition all .2s ease
+    background #fff url('./assets/search.svg') 0.6rem 0.5rem no-repeat
+    background-size 1rem
 
-  input {
-    cursor: text;
-    width: 10rem;
-    height: 2rem;
-    color: lighten($textColor, 25%);
-    display: inline-block;
-    border: 1px solid darken($borderColor, 10%);
-    border-radius: .4rem;
-    font-size: 0.9rem;
-    line-height: 2rem;
-    padding: 0 0.5rem 0 2rem;
-    outline: none;
-    transition: all 0.2s ease;
-    background: #fff url('./assets/search.svg') 0.6rem 0.5rem no-repeat;
-    background-size: 1rem;
-
-    &:focus {
-      cursor: auto;
-      border-color: $accentColor;
+    &:focus
+      cursor auto
+      border-color $accentColor
       width: 15rem;
-    }
-  }
+  .suggestions
+    background #fff
+    width 20rem
+    position absolute
+    top 1.5rem
+    border 1px solid darken($borderColor, 10%)
+    border-radius .6rem
+    padding 0.4rem
+    list-style-type none
+    &.align-right
+      right 0
+  .suggestion
+    line-height 1.4
+    padding 0.6rem 1rem
+    cursor pointer
 
-  .suggestions {
-    background: white;
-    width: 20rem;
-    position: absolute;
-    top: 1.5rem;
-    border: 1px solid darken($borderColor, 10%);
-    padding: .4rem;
-    border-radius: .6rem;
-    list-style-type: none;
-
-    &.align-right {
-      right: 0;
-    }
-  }
-
-  .suggestion {
-    line-height: 1.4;
-    padding: 0.6rem 1rem;
-    cursor: pointer;
-
-    a {
+    a
       white-space: normal;
       color: lighten($textColor, 35%);
 
-      em {
-        color: $accentColor;
-        font-weight bold;
+      em
+        color $accentColor
+        font-weight bold
         font-style normal
-      }
-      .suggestion__title {
-        font-weight: 600;
-        color: $textColor;
-        display block;
-        padding-bottom .4rem;
-      }
+      .suggestion__title
+        font-weight 600
+        color $textColor
+        display block
+        padding-bottom .4rem
 
-      .suggestion__text {
-        font-size: 0.9em;
-      }
-    }
-
-    &.focused {
-      background-color: lighten($accentColor, 93%);
-    }
-  }
-}
-
-@media (max-width: $MQNarrow) {
-  .search-box {
-    input {
-      cursor: pointer;
-      width: 0;
-      border-color: transparent;
-      position: relative;
-
-      &:focus {
-        cursor: text;
-        left: 0;
-        width: 10rem;
-      }
-    }
-  }
-}
+      .suggestion__text
+        font-size 0.9em
+    &.focused
+      background-color lighten($accentColor, 93%)
+@media (max-width: $MQNarrow)
+  .search-box
+    input
+      cursor pointer
+      width 0
+      border-color transparent
+      position relative
+      &:focus
+        cursor text
+        left 0
+        width 10rem
 
 // Match IE11
-@media all and (-ms-high-contrast: none) {
-  .search-box input {
-    height: 2rem;
-  }
-}
+@media all and (-ms-high-contrast: none)
+  .search-box input
+    height 2rem
 
-@media (max-width: $MQNarrow) and (min-width: $MQMobile) {
-  .search-box {
-    .suggestions {
-      left: 0;
-    }
-  }
-}
+@media (max-width: $MQNarrow) and (min-width: $MQMobile)
+  .search-box
+    .suggestions
+      left 0
 
-@media (max-width: $MQMobile) {
-  .search-box {
-    margin-right: 0;
+@media (max-width: $MQMobile)
+  .search-box
+    margin-right 0
+    input
+      left 1rem
+    .suggestions
+      right 0
 
-    input {
-      left: 1rem;
-    }
+@media (max-width: $MQMobileNarrow)
+  .search-box
+    .suggestions
+      width calc(100vw - 4rem)
+    input:focus
+      width 8rem
 
-    .suggestions {
-      right: 0;
-    }
-  }
-}
-
-@media (max-width: $MQMobileNarrow) {
-  .search-box {
-    .suggestions {
-      width: calc(100vw - 4rem);
-    }
-
-    input:focus {
-      width: 8rem;
-    }
-  }
-}
-
-.highlighted {
-  color: $accentColor;
-}
+.highlighted
+  color $accentColor
 </style>
