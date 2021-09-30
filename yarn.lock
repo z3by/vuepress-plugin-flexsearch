@@ -1015,6 +1015,11 @@
   version "1.4.1"
   resolved "https://registry.yarnpkg.com/@vuepress/plugin-search/-/plugin-search-1.4.1.tgz#5842f7ef0214c8f9f3cafa6ca2f4648f8dbc03d2"
 
+"@vuepress/plugin-search@^1.8.2":
+  version "1.8.2"
+  resolved "https://registry.yarnpkg.com/@vuepress/plugin-search/-/plugin-search-1.8.2.tgz#74b92f663acf6b4560e15dc0442a84c4e874e206"
+  integrity sha512-JrSJr9o0Kar14lVtZ4wfw39pplxvvMh8vDBD9oW09a+6Zi/4bySPGdcdaqdqGW+OHSiZNvG+6uyfKSBBBqF6PA==
+
 "@vuepress/shared-utils@1.4.1":
   version "1.4.1"
   resolved "https://registry.yarnpkg.com/@vuepress/shared-utils/-/shared-utils-1.4.1.tgz#d09fcd742111f2efeef93b9c9b353bcd8202ae97"
