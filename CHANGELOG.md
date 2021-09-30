@@ -1,3 +1,9 @@
+# 0.3.0 (2021-09-30)
+
+- Reuse most code from @vuepress/plugin-search
+- Refactor so code style matches @vuepress/plugin-search
+- Dependency upgrades
+
 # 0.2.0 (2021-06-02)
 
 - Dependency upgrades
