@@ -26,7 +26,7 @@ Use the default settings:
 
 module.exports = {
     plugins: [
-      ['flexsearch'],
+      ['flexSearch'],
       // other plugins
     ]
 }
@@ -39,7 +39,7 @@ Or modify the settings to match your needs:
 
 module.exports = {
     plugins: [
-      ['flexsearch', {
+      ['flexSearch', {
         /*
           Plugin custom options
         */
