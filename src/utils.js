@@ -4,7 +4,7 @@ const he = require("he");
  * @param  page
  * @returns {string}
  */
-module.exports.getPageText = (page) => {
+module.exports.getPageText = (page, noExtraSpaceAfterHtmlTag) => {
   if (!page._strippedContent) {
     return "";
   }
@@ -14,7 +14,7 @@ module.exports.getPageText = (page) => {
   const text = he.decode(
     // decode HTML entities like &quot;
     html
-      .replace(/(<[^>]+>)+/g, " ") // remove HTML tags
+      .replace(/<[^>]*(>|$)/g, noExtraSpaceAfterHtmlTag ? "" : " ") // remove HTML tags
       .replace(/^\s*#\s/gm, "") // remove header anchors inserted by vuepress
   );
   return text;
@@ -29,9 +29,9 @@ function escapeRegExp(string) {
  * @param  {string} highlightTarget
  * @returns {string}
  */
-module.exports.highlightText = (fullText, highlightTarget) => {
+module.exports.highlightText = (fullText, highlightTarget, splitBy) => {
   let result = fullText;
-  highlightWords = highlightTarget.split(" ").filter((word) => word.length > 0);
+  highlightWords = highlightTarget.split(splitBy).filter((word) => word.length > 0);
   if (highlightWords.length > 0) {
     for (const word of highlightWords) {
       result = result.replace(new RegExp(escapeRegExp(word), "ig"), "<em>$&</em>");

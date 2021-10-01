@@ -56,6 +56,7 @@ SEARCH_PATHS
 SEARCH_HOTKEYS
 SEARCH_OPTIONS
 SEARCH_RESULT_LENGTH
+SEARCH_SPLIT_HIGHLIGHTED_WORDS
 */
 export default {
   extends: VuepressSearchBox,
@@ -84,6 +85,10 @@ export default {
         });
 
       return result;
+    },
+
+    splitBy() {
+      return SEARCH_SPLIT_HIGHLIGHTED_WORDS || this.index.split;
     },
   },
 
@@ -115,7 +120,7 @@ export default {
 
     getSuggestionTitle(page) {
       const title = page.title ? page.title : page.regularPath;
-      return highlightText(title, this.query);
+      return highlightText(title, this.query, this.splitBy);
     },
 
     getSuggestionText(page) {
@@ -123,7 +128,7 @@ export default {
       const queryIndex = content
         .toLowerCase()
         .indexOf(this.query.toLowerCase());
-      const queryFirstWord = this.query.split(" ")[0];
+      const queryFirstWord = this.query.split(this.splitBy)[0];
       let startIndex =
         queryIndex === -1
           ? content.toLowerCase().indexOf(queryFirstWord.toLowerCase())
@@ -134,7 +139,7 @@ export default {
         prefix = ".. ";
       }
       const text = page.content.substr(startIndex, SEARCH_RESULT_LENGTH);
-      return prefix + highlightText(text, this.query);
+      return prefix + highlightText(text, this.query, this.splitBy);
     },
   },
 };
