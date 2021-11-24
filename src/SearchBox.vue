@@ -4,8 +4,8 @@
       ref="input"
       aria-label="Search"
       :value="query"
-      :class="{ 'focused': focused }"
-      :placeholder="placeholder"
+      :class="{ focused: focused }"
+      :placeholder="placeholder || 'Search'"
       autocomplete="off"
       spellcheck="false"
       @input="query = $event.target.value"
@@ -14,7 +14,7 @@
       @keyup.enter="go(focusIndex)"
       @keyup.up="onUp"
       @keyup.down="onDown"
-    >
+    />
     <ul
       v-if="showSuggestions"
       class="suggestions"
@@ -30,10 +30,7 @@
         @mouseenter="focus(i)"
       >
         <!-- Override @vuepress/plugin-search/SearchBox.vue -->
-        <a
-          :href="s.regularPath"
-          @click.prevent
-        >
+        <a :href="s.regularPath" @click.prevent>
           <span
             v-html="s.title || s.regularPath"
             class="suggestion__title"
@@ -47,7 +44,7 @@
 
 <script>
 import VuepressSearchBox from "@vuepress/plugin-search/SearchBox.vue";
-import Flexsearch from "flexsearch";
+import { Document } from "flexsearch";
 import { highlightText } from "./utils";
 
 /* global
@@ -60,22 +57,33 @@ SEARCH_SPLIT_HIGHLIGHTED_WORDS
 */
 export default {
   extends: VuepressSearchBox,
-  data () {
+  data() {
     return {
       index: null,
-    }
+    };
   },
 
   computed: {
     // Override @vuepress/plugin-search/SearchBox.vue
-    suggestions () {
-      const query = this.query.trim().toLowerCase()
-      if (!query) {
-        return
+    suggestions() {
+      const query = this.query.trim().toLowerCase();
+      if (!query || !this.index) {
+        return;
       }
 
-      const result = this.index
-        .search(query, SEARCH_MAX_SUGGESTIONS)
+      const results = this.index
+        .search(query, { enrich: true })
+        .reduce(
+          (prev, current) => {
+            const combinedResults = [...prev.result, ...current.result];
+            const uniqueResults = Array.from(
+              new Set(combinedResults.map((i) => JSON.stringify(i)))
+            ).map((i) => JSON.parse(i));
+            return { result: uniqueResults };
+          },
+          { result: [] }
+        )
+        .result.map((match) => match.doc)
         .map((page) => {
           return {
             ...page,
@@ -83,16 +91,15 @@ export default {
             text: this.getSuggestionText(page),
           };
         });
-
-      return result;
+      return results;
     },
 
     splitBy() {
-      return SEARCH_SPLIT_HIGHLIGHTED_WORDS || this.index.split;
+      return SEARCH_SPLIT_HIGHLIGHTED_WORDS;
     },
   },
 
-  mounted () {
+  mounted() {
     this.setupFlexSearch();
   },
 
@@ -100,22 +107,31 @@ export default {
     // Override @vuepress/plugin-search/SearchBox.vue
     go(i) {
       if (!this.showSuggestions) {
-        return
+        return;
       }
-      const path = this.suggestions[i].path
+      const path = this.suggestions[i].path;
 
       if (this.$route.path !== path) {
-        this.$router.push(this.suggestions[i].path)
+        this.$router.push(this.suggestions[i].path);
       }
 
-      this.query = ''
-      this.focusIndex = 0
+      this.query = "";
+      this.focusIndex = 0;
     },
 
     setupFlexSearch() {
-      this.index = new Flexsearch(SEARCH_OPTIONS);
+      this.index = new Document({
+        ...SEARCH_OPTIONS,
+        document: {
+          id: "key",
+          index: ["title", "content"],
+          store: true,
+        },
+      });
       const { pages } = this.$site;
-      this.index.add(pages);
+      pages.forEach((page) => {
+        this.index.add(page.key, page);
+      });
     },
 
     getSuggestionTitle(page) {
@@ -147,28 +163,45 @@ export default {
 
 <style lang="stylus">
 // Override @vuepress/plugin-search/SearchBox.vue
-.search-box
-  input
-    border-radius .4rem
-    &:focus
+.search-box {
+  input {
+    border-radius: 0.4rem;
+
+    &:focus {
       width: 15rem;
-  .suggestions
-    top 1.5rem
-    border-radius .6rem
-  .suggestion
-    padding 0.6rem 1rem
-    a
-      em
-        color $accentColor
-        font-weight bold
-        font-style normal
-      .suggestion__title
-        font-weight 600
-        color $textColor
-        display block
-        padding-bottom .4rem
-      .suggestion__text
-        font-size 0.9em
-    &.focused
-      background-color lighten($accentColor, 93%)
+    }
+  }
+
+  .suggestions {
+    top: 1.5rem;
+    border-radius: 0.6rem;
+  }
+
+  .suggestion {
+    padding: 0.6rem 1rem;
+
+    a {
+      em {
+        color: $accentColor;
+        font-weight: bold;
+        font-style: normal;
+      }
+
+      .suggestion__title {
+        font-weight: 600;
+        color: $textColor;
+        display: block;
+        padding-bottom: 0.4rem;
+      }
+
+      .suggestion__text {
+        font-size: 0.9em;
+      }
+    }
+
+    &.focused {
+      background-color: lighten($accentColor, 93%);
+    }
+  }
+}
 </style>
