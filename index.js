@@ -2,16 +2,11 @@ const { path } = require("@vuepress/shared-utils");
 const { getPageText } = require("./src/utils");
 
 let defaultSearchOptions = {
-  encode: "icase",
-  tokenize: "forward",
-  resolution: 9,
-  doc: {
-    id: "key",
-    field: ["title", "content", "headers"],
-  },
+  tokenize: "full",
 };
 
 const DEFAULT_SEARCH_RESULT_LENGTH = 60;
+const REGEX_WHITESPACE = /[\p{Z}\p{S}\p{P}\p{C}]+/u;
 
 module.exports = (options) => ({
   extendPageData($page) {
@@ -27,6 +22,7 @@ module.exports = (options) => ({
     SEARCH_HOTKEYS: options.searchHotkeys || "s",
     SEARCH_RESULT_LENGTH:
       Number(options.searchResultLength) || DEFAULT_SEARCH_RESULT_LENGTH,
-    SEARCH_SPLIT_HIGHLIGHTED_WORDS: options.splitHighlightedWords || null,
+    SEARCH_SPLIT_HIGHLIGHTED_WORDS:
+      options.splitHighlightedWords || REGEX_WHITESPACE,
   },
 });
