@@ -31,7 +31,7 @@ function escapeRegExp(string) {
  */
 module.exports.highlightText = (fullText, highlightTarget, splitBy) => {
   let result = fullText;
-  highlightWords = highlightTarget.split(splitBy).filter((word) => word.length > 0);
+  const highlightWords = highlightTarget.split(splitBy).filter((word) => word.length > 0);
   if (highlightWords.length > 0) {
     for (const word of highlightWords) {
       result = result.replace(new RegExp(escapeRegExp(word), "ig"), "<em>$&</em>");
