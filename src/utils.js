@@ -43,3 +43,20 @@ module.exports.highlightText = (fullText, highlightTarget, splitBy) => {
   return result;
 };
 
+/**
+ * Returns whether the given page is searchable, i.e. it's path is not excluded.
+ * 
+ * @param  page
+ * @param  excludePaths Array of excluded paths
+ * @returns {boolean}
+ */
+module.exports.isSearchable = (page, excludePaths) => {
+  if(excludePaths === null) {
+    return true;
+  }
+  return excludePaths.filter(path => {
+    return page.path.match(path)
+  }).length === 0
+}
+
+

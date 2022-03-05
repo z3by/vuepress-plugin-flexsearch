@@ -24,6 +24,7 @@ module.exports = (options) => ({
     SEARCH_OPTIONS: options.search_options || defaultSearchOptions,
     SEARCH_MAX_SUGGESTIONS: options.maxSuggestions || 10,
     SEARCH_PATHS: options.searchPaths || null,
+    SEARCH_EXCLUDE_PATHS: options.searchExcludePaths || null,
     SEARCH_HOTKEYS: options.searchHotkeys || "s",
     SEARCH_RESULT_LENGTH:
       Number(options.searchResultLength) || DEFAULT_SEARCH_RESULT_LENGTH,

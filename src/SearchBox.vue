@@ -49,10 +49,12 @@
 import VuepressSearchBox from "@vuepress/plugin-search/SearchBox.vue";
 import Flexsearch from "flexsearch";
 import { highlightText } from "./utils";
+import { isSearchable } from "./utils";
 
 /* global
 SEARCH_MAX_SUGGESTIONS
 SEARCH_PATHS
+SEARCH_EXCLUDE_PATHS
 SEARCH_HOTKEYS
 SEARCH_OPTIONS
 SEARCH_RESULT_LENGTH
@@ -74,7 +76,7 @@ export default {
         return
       }
 
-      const result = this.index
+      const unfilteredResult = this.index
         .search(query, SEARCH_MAX_SUGGESTIONS)
         .map((page) => {
           return {
@@ -84,7 +86,11 @@ export default {
           };
         });
 
-      return result;
+      if(SEARCH_EXCLUDE_PATHS === null) { 
+        return unfilteredResult;
+      } else {
+        return unfilteredResult.filter(page => isSearchable(page, SEARCH_EXCLUDE_PATHS));
+      }
     },
 
     splitBy() {

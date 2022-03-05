@@ -45,6 +45,7 @@ module.exports = {
         */
         maxSuggestions: 10,    // how many search suggestions to show on the menu, the default is 10.
         searchPaths: ['path1', 'path2'],    // an array of paths to search in, keep it null to search all docs.
+        searchExcludePaths: ['pathToExclude1', 'pathToExclude1'], // an array of paths to exclude.
         searchHotkeys: ['s'],    // Hot keys to activate the search input, the default is "s" but you can add more.
         searchResultLength: 60,    // the length of the suggestion result text by characters, the default is 60 characters.
         splitHighlightedWords: ' ',  // regex or string to split highlighted words by, keep it null to use flexsearch.split
