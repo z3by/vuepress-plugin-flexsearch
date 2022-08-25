@@ -20,8 +20,13 @@ module.exports.getPageText = (page) => {
   return text;
 };
 
-function escapeRegExp(string) {
-  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+function normalizeString(string) {
+  return string.replace(/<|>/g, '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function generateRegExp(string) {
+  const stringNormalized = normalizeString(string);
+  return `(?<!</?[^>]*|&[^;]*)${stringNormalized}`;
 }
 
 /**
@@ -34,10 +39,10 @@ module.exports.highlightText = (fullText, highlightTarget) => {
   highlightWords = highlightTarget.split(" ").filter((word) => word.length > 0);
   if (highlightWords.length > 0) {
     for (const word of highlightWords) {
-      result = result.replace(new RegExp(escapeRegExp(word), "ig"), "<em>$&</em>");
+      result = result.replace(new RegExp(generateRegExp(word), "ig"), "<em>$&</em>");
     }
   } else {
-    result = fullText.replace(new RegExp(escapeRegExp(highlightTarget), "ig"), "<em>$&</em>");
+    result = fullText.replace(new RegExp(generateRegExp(highlightTarget), "ig"), "<em>$&</em>");
   }
 
   return result;
